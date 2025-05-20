@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>To-Do App</title>
+  <style>
+    :root {
+      --primary-color: #4CAF50;
+      --background-color: #f4f4f9;
+      --card-color: #ffffff;
+      --text-color: #333;
+      --border-radius: 12px;
+      --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: 
+        linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
+        url('https://i.pinimg.com/736x/93/5e/07/935e072a7aaf4c434e101e3ea122a1b5.jpg') no-repeat center center fixed;
+      background-size: cover;
+      color: var(--text-color);
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      background: var(--card-color);
+      padding: 20px;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      width: 100%;
+      max-width: 500px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    input, button {
+      padding: 12px;
+      margin-bottom: 10px;
+      width: 100%;
+      border: 1px solid #ccc;
+      border-radius: var(--border-radius);
+      font-size: 16px;
+    }
+
+    button {
+      background-color: var(--primary-color);
+      color: #fff;
+      border: none;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    .task {
+      background: #fdfdfd;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: var(--border-radius);
+      display: flex;
+      flex-direction: column;
+      margin-top: 10px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    .task.completed .title {
+      text-decoration: line-through;
+      color: grey;
+    }
+
+    .task-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .title {
+      font-weight: 500;
+      font-size: 1.1em;
+    }
+
+    .datetime {
+      font-size: 0.85em;
+      color: #888;
+      margin-top: 4px;
+    }
+
+    .task-buttons {
+      display: flex;
+      justify-content: flex-end;
+      gap: 5px;
+      margin-top: 10px;
+    }
+
+    .task-buttons button {
+      flex: 1;
+      font-size: 14px;
+      padding: 8px;
+      background-color: #eee;
+      color: #333;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .task-buttons button:hover {
+      background-color: #ddd;
+    }
+
+    @media (max-width: 480px) {
+      .task-buttons {
+        flex-direction: column;
+      }
+      .task-buttons button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>To-Do List</h1>
+    <input type="text" id="taskInput" placeholder="Enter task title" />
+    <input type="datetime-local" id="taskDateTime" />
+    <button onclick="addTask()">Add Task</button>
+    <div id="taskList"></div>
+  </div>
+
+  <script>
+    let tasks = [];
+
+    function addTask() {
+      const title = document.getElementById('taskInput').value;
+      const dateTime = document.getElementById('taskDateTime').value;
+
+      if (title.trim() === '') return alert('Please enter a task.');
+
+      const task = {
+        id: Date.now(),
+        title,
+        dateTime,
+        completed: false
+      };
+      tasks.push(task);
+      renderTasks();
+      document.getElementById('taskInput').value = '';
+      document.getElementById('taskDateTime').value = '';
+    }
+
+    function renderTasks() {
+      const taskList = document.getElementById('taskList');
+      taskList.innerHTML = '';
+      tasks.forEach(task => {
+        const taskDiv = document.createElement('div');
+        taskDiv.className = 'task' + (task.completed ? ' completed' : '');
+
+        const header = document.createElement('div');
+        header.className = 'task-header';
+
+        const titleSpan = document.createElement('span');
+        titleSpan.className = 'title';
+        titleSpan.textContent = task.title;
+
+        header.appendChild(titleSpan);
+
+        const dateSpan = document.createElement('div');
+        dateSpan.className = 'datetime';
+        dateSpan.textContent = task.dateTime;
+
+        const btnGroup = document.createElement('div');
+        btnGroup.className = 'task-buttons';
+
+        const completeBtn = document.createElement('button');
+        completeBtn.textContent = task.completed ? 'Undo' : 'Done';
+        completeBtn.onclick = () => toggleComplete(task.id);
+
+        const editBtn = document.createElement('button');
+        editBtn.textContent = 'Edit';
+        editBtn.onclick = () => editTask(task.id);
+
+        const delBtn = document.createElement('button');
+        delBtn.textContent = 'Delete';
+        delBtn.onclick = () => deleteTask(task.id);
+
+        btnGroup.appendChild(completeBtn);
+        btnGroup.appendChild(editBtn);
+        btnGroup.appendChild(delBtn);
+
+        taskDiv.appendChild(header);
+        taskDiv.appendChild(dateSpan);
+        taskDiv.appendChild(btnGroup);
+
+        taskList.appendChild(taskDiv);
+      });
+    }
+
+    function toggleComplete(id) {
+      const task = tasks.find(t => t.id === id);
+      task.completed = !task.completed;
+      renderTasks();
+    }
+
+    function deleteTask(id) {
+      tasks = tasks.filter(t => t.id !== id);
+      renderTasks();
+    }
+
+    function editTask(id) {
+      const task = tasks.find(t => t.id === id);
+      const newTitle = prompt('Edit task:', task.title);
+      const newDateTime = prompt('Edit date/time:', task.dateTime);
+      if (newTitle !== null) task.title = newTitle;
+      if (newDateTime !== null) task.dateTime = newDateTime;
+      renderTasks();
+    }
+  </script>
+</body>
+</html>
